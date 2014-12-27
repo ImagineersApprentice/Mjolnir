@@ -1,9 +1,13 @@
 #include <Adafruit_NeoPixel.h>
+#include <SoftwareSerial.h>
+#include <XBee.h>
 
-#define lPIN 6
-#define tPIN 9
-
-  const int sensorPin =  5;      // the number of the sensor pin
+  /*****************************/
+  /***** NeoPixel Setup ********/
+  /*****************************/
+  
+  #define lPIN 6
+  #define tPIN 9
   
   //Lightning Code
   //Written by: Jason Yandell  
@@ -20,22 +24,77 @@
   //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
   Adafruit_NeoPixel lStrip = Adafruit_NeoPixel(TOTAL_LEDS, lPIN, NEO_GRB + NEO_KHZ800);
   Adafruit_NeoPixel tStrip = Adafruit_NeoPixel(TOTAL_LEDS, tPIN, NEO_GRB + NEO_KHZ800);
+  
+  /*************************************/
+  /***** Vibration Sensor Setup ********/
+  /*************************************/
+  
+  const int sensorPin =  5;      // the number of the sensor pin
+  
+  /********************************/
+  /***** XBee Sensor Setup ********/
+  /********************************/
+  
+  
+  SoftwareSerial xbeeSerial(2, 3); // Arduino RX, TX (XBee Dout, Din)
+
+  XBee xbee = XBee();
+  XBeeResponse response = XBeeResponse();
+  //Create reusable response objects for responses we expect to handle
+  Rx16Response rx16 = Rx16Response();
+  
+  //data is activation from muscle sensor
+  uint8_t data = 0;
+  //rssi is signal strength for proximity of gauntlet to mjolnir
+  uint8_t rssi = 0;
 
 void setup(){
   
-  // initialize the sensor pin as an input & enable the pullups
-  pinMode(sensorPin, INPUT_PULLUP);   
-  
+  // initalize NeoPixel
   lStrip.begin();
   tStrip.begin();
   lStrip.show(); // Initialize all pixels to 'off'
   tStrip.show(); // Initialize all pixels to 'off'
+  
+  // initialize the sensor pin as an input & enable the pullups
+  pinMode(sensorPin, INPUT_PULLUP);  
+  
+  // initialize Serial for XBee communication
+  Serial.begin(57600);
+  xbee.setSerial(Serial);
 }
 
 void loop() {
-  
-  if (digitalRead(sensorPin) == LOW){
     
+  xbee.readPacket();
+
+  // check XBee on Gauntlet
+  if (xbee.getResponse().isAvailable()) {
+    // got something
+
+    // create a response
+    xbee.getResponse().getRx16Response(rx16);
+    data = rx16.getData(0);
+    rssi = rx16.getRssi();
+    //Serial.print("RSSI: ");
+    //Serial.print(rssi);
+    //Serial.println();
+
+   // if Mjolnir is too far from the gauntlet 
+   //get angry
+   if (rssi >=65){
+     
+    //Mjolnir Gets Angry
+   
+   }
+   // if muscle is activated
+   // pretty lights
+   else if (data == 1){
+   }
+  }
+  // check the Vibration Sensor  
+  else if (digitalRead(sensorPin) == LOW){
+    // lightning effect
     delay(50);
     lightning(0.08);
     delay(50);
