@@ -1,60 +1,77 @@
-#include <XBee.h>
 
-XBee xbee = XBee();
 
-unsigned long start = millis();
+    /*******************
+    **** XBee Setup ****
+    *******************/
+    
+    #include <XBee.h>
+    
+    XBee xbee = XBee();
+    
+    unsigned long start = millis();
+   
+  
+    //Create reusable response objects for responses we expect to handle
+    Rx16Response rx16 = Rx16Response();
+    
+    // allocate two bytes for to hold a 10-bit analog reading
+    
+    TxStatusResponse txStatus = TxStatusResponse();
+    
 
-uint8_t payload[] = { 0, 0 };
-
-Tx16Request tx = Tx16Request(0x1874, payload, sizeof(payload));
-
-//Create reusable response objects for responses we expect to handle
-Rx16Response rx16 = Rx16Response();
-
-// allocate two bytes for to hold a 10-bit analog reading
-
-TxStatusResponse txStatus = TxStatusResponse();
-
-int statusLed=13;
+    /****************************
+    **** Muscle Sensor Setup ****
+    ****************************/
+    
+    int sensorPin = A7;    // select the input pin for the potentiometer
+    int ledPin = 13;      // select the pin for the LED
+    int sensorValue = 0;  // variable to store the value coming from the sensor
+    
 
 void setup() {
   //setup LED
-  pinMode(statusLed, OUTPUT);
+  pinMode(ledPin, OUTPUT);
 
   //serial
   Serial.begin(57600);
   xbee.setSerial(Serial);
 
-  flashLed(statusLed, 3, 50);
+  flashLed(ledPin, 2, 50);
 }
 
 
 void loop() {
 
+  // if muscle sensor is aabove 30, consider it "activated"
+  sensorValue = analogRead(sensorPin);    
+  if (sensorValue > 20){
+
+    flashLed(ledPin, 4, 50);
+    
+    uint8_t payload[] = { 0, 1 };
+    
+    Tx16Request tx = Tx16Request(0x1874, payload, sizeof(payload));
+    
     xbee.send(tx);
     
-    flashLed(statusLed, 1, 10);
+    flashLed(ledPin, 1, 10);
 
-    // after sending a tx request, we expect a status response
-    // wait up to 5 seconds for the status response
-    if (xbee.readPacket(5000)) {
-      // got a response!
+    
+  }
+  else {
+    
+    uint8_t payload[] = { 0, 0 };
+    
+    Tx16Request tx = Tx16Request(0x1874, payload, sizeof(payload));
+    
+    xbee.send(tx);
+    
+    flashLed(ledPin, 1, 10);
 
-      // should be a znet tx status                   
-      if (xbee.getResponse().getApiId() == TX_STATUS_RESPONSE) {
-        xbee.getResponse().getZBTxStatusResponse(txStatus);
 
-        // get the delivery status, the fifth byte
-        if (txStatus.getStatus() == SUCCESS) {
-          // success.  time to celebrate
-          flashLed(statusLed, 5, 50);
-        } 
-
-      }      
-    } 
-
-    delay(100);
-
+  
+  }
+  delay(100);
 }
 
 
