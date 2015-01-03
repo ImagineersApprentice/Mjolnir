@@ -1,77 +1,60 @@
 
-
-    /*******************
-    **** XBee Setup ****
-    *******************/
-    
-    #include <XBee.h>
-    
-    XBee xbee = XBee();
-    
-    unsigned long start = millis();
-   
-  
-    //Create reusable response objects for responses we expect to handle
-    Rx16Response rx16 = Rx16Response();
-    
-    // allocate two bytes for to hold a 10-bit analog reading
-    
-    TxStatusResponse txStatus = TxStatusResponse();
-    
-
-    /****************************
-    **** Muscle Sensor Setup ****
-    ****************************/
-    
-    int sensorPin = A7;    // select the input pin for the potentiometer
-    int ledPin = 13;      // select the pin for the LED
-    int sensorValue = 0;  // variable to store the value coming from the sensor
-    
+/*
+ * A simple example program that will send text every second.
+ * I use this to make sure my Fio and XBee are working appropriately.
+ *
+ * I hook another XBee up to my computer with an breakout board and
+ * use CoolTerm to display the messages.
+ */
+ 
+  /*********************
+    **** Switch Setup ****
+    *********************/
+    const int buttonPin = 2;     // the number of the pushbutton pin
+    const int ledPin =  13;      // the number of the LED pin    
+    int buttonState = 0;         // variable for reading the pushbutton status
+    int lastButtonState = 0;
+    int ledState = 0;
+    boolean onOff = false;
+    boolean lastOnOff = false;
 
 void setup() {
-  //setup LED
+  Serial.begin(57600);	// opens port at 57600 bps
+    // initialize the LED pin as an output:
   pinMode(ledPin, OUTPUT);
-
-  //serial
-  Serial.begin(57600);
-  xbee.setSerial(Serial);
+  digitalWrite(ledPin, LOW);  
+  // initialize the pushbutton pin as an input:
+  pinMode(buttonPin, INPUT_PULLUP);   
 
   flashLed(ledPin, 2, 50);
 }
 
-
 void loop() {
 
-  // if muscle sensor is aabove 30, consider it "activated"
-  sensorValue = analogRead(sensorPin);    
-  if (sensorValue > 20){
+  buttonState = digitalRead(buttonPin);
+  ledState = digitalRead(ledPin);
+  
 
-    flashLed(ledPin, 4, 50);
-    
-    uint8_t payload[] = { 0, 1 };
-    
-    Tx16Request tx = Tx16Request(0x1874, payload, sizeof(payload));
-    
-    xbee.send(tx);
-    
-    flashLed(ledPin, 1, 10);
+  // check if the pushbutton is pressed.
+  // if it is, the buttonState is HIGH:
+  if (buttonState != lastButtonState){
 
-    
-  }
-  else {
-    
-    uint8_t payload[] = { 0, 0 };
-    
-    Tx16Request tx = Tx16Request(0x1874, payload, sizeof(payload));
-    
-    xbee.send(tx);
-    
-    flashLed(ledPin, 1, 10);
-
-
+  Serial.print(!onOff);
+  Serial.write(10); //
+  digitalWrite(ledPin, !ledState);
+  
   
   }
-  delay(100);
+  else{
+  Serial.print(lastOnOff);
+  Serial.write(10);
+  }
+  
+  lastButtonState = buttonState;
+  lastOnOff = onOff;
+  
+    // wait 1 second then loop again
+  delay(1000);
 }
 
 
@@ -87,5 +70,4 @@ void flashLed(int pin, int times, int wait) {
     }
   }
 }
-
 
