@@ -81,8 +81,8 @@ void setup(){
 void loop() {
 
  Narcoleptic.delay(500); // During this time power consumption is minimised
- cd77colorallfill(200);
- 
+
+
   while (digitalRead(switchOn) == LOW || digitalRead(switchWait) == LOW){
 
     if (digitalRead(switchWait) == LOW){
@@ -114,27 +114,30 @@ void loop() {
           delay(50);
           angryLightning(0.175);
           delay(50);
-          cd77colorallfill(200);
-          
-          
+          fadeOut(1);
+
+
         }
         // if muscle is activated
         // pretty lights
         else if (data == 49){
+          
+          fadeIn(10);
+          rainbow(10);
+          fadeOut(10);
+          return;
 
-        rainbow(10);
-        cd77colorallfill(200);
-        
         }
       }
       // check the Vibration Sensor  
       if (digitalRead(sensorPin) == LOW){
 
-      lightningOnce(100);
-      cd77colorallfill(1000); 
-        
-       
-       }
+        cd77colorallfillOn(200);
+        delay(25);
+        cd77colorallfill(200);
+
+
+      }
     }
 
     if (digitalRead(switchOn) == LOW){
@@ -145,28 +148,6 @@ void loop() {
 
 
 }
-
-void lightning(float SpeedFactor){
-
-  // Make the lights breathe
-  for (int i = 0; i < 100; i++) {
-    // Intensity will go from 10 - MaximumBrightness in a "breathing" manner
-    float intensity = MaximumBrightness /2.0 * (1.0 + sin(SpeedFactor * i));
-    lStrip.setBrightness(intensity);
-    tStrip.setBrightness(intensity);
-    // Now set every LED to that color
-    for (int ledNumber=0; ledNumber<TOTAL_LEDS; ledNumber++) {
-      lStrip.setPixelColor(ledNumber, 88, 195, 185);
-      tStrip.setPixelColor(ledNumber, 88, 195, 185);
-    }
-
-    lStrip.show();
-    tStrip.show();
-    //Wait a bit before continuing to breathe
-    delay(StepDelay);
-  } 
-}
-
 
 void angryLightning(float SpeedFactor){
 
@@ -190,16 +171,6 @@ void angryLightning(float SpeedFactor){
 }
 
 // Fills the NeoMatrix 8X8 panel with all of the NeoPixes at one time 
-void cd77colorallfill(uint16_t wait) {  
-  for(uint16_t i=0; i<lStrip.numPixels(); i++) {
-    lStrip.setPixelColor(i, lStrip.Color(0, 0, 0));
-    tStrip.setPixelColor(i, lStrip.Color(0, 0, 0));    
-  }       
-  lStrip.show();
-  tStrip.show();
-  delay(wait);
-}
-
 void cd77colorallfillOn(uint16_t wait) {  
   for(uint16_t i=0; i<lStrip.numPixels(); i++) {
     lStrip.setPixelColor(i, lStrip.Color(88, 195, 185));   
@@ -210,25 +181,14 @@ void cd77colorallfillOn(uint16_t wait) {
   delay(wait);
 }
 
-void lightningOnce(float SpeedFactor){
-
-  // Make the lights breathe
-  for (int i = 100; i == 0; i--) {
-    // Intensity will go from 10 - MaximumBrightness in a "breathing" manner
-    float intensity = MaximumBrightness /2.0 * (1.0 + sin(SpeedFactor * i));
-    lStrip.setBrightness(intensity);
-    tStrip.setBrightness(intensity);
-    // Now set every LED to that color
-    for (int ledNumber=0; ledNumber<TOTAL_LEDS; ledNumber++) {
-      lStrip.setPixelColor(ledNumber, 88, 195, 185);
-      tStrip.setPixelColor(ledNumber, 88, 195, 185);
-    }
-
-    lStrip.show();
-    tStrip.show();
-    //Wait a bit before continuing to breathe
-    delay(StepDelay);
-  } 
+void cd77colorallfill(uint16_t wait) {  
+  for(uint16_t i=0; i<lStrip.numPixels(); i++) {
+    lStrip.setPixelColor(i, lStrip.Color(0, 0, 0));   
+    tStrip.setPixelColor(i, tStrip.Color(0, 0, 0));   
+  }       
+  lStrip.show();
+  tStrip.show();
+  delay(wait);
 }
 
 // Input a value 0 to 255 to get a color value.
@@ -236,16 +196,18 @@ void lightningOnce(float SpeedFactor){
 uint32_t Wheel(byte WheelPos) {
   WheelPos = 165 - WheelPos;
   if(WheelPos < 85) {
-   return lStrip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-   return tStrip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-  } else if(WheelPos < 170) {
+    return lStrip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+    return tStrip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  } 
+  else if(WheelPos < 170) {
     WheelPos -= 85;
-   return lStrip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-   return tStrip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-  } else {
-   WheelPos -= 170;
-   return lStrip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
-   return tStrip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+    return lStrip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+    return tStrip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  } 
+  else {
+    WheelPos -= 170;
+    return lStrip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+    return tStrip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
   }
 }
 
@@ -262,6 +224,77 @@ void rainbow(uint8_t wait) {
     delay(wait);
   }
 }
+
+void fadeIn(int waitT)
+{
+  int R = 0;
+  int G = 0;
+  int B = 0;
+  int finCount=30;
+  int Rset = 125;
+  int Gset = 125;
+  int Bset = 125;
+
+  //Fade in
+  while(1){ //using an inf loop to be more custom.
+
+    //break the inf loop if the color is higher then what its set at.
+    if (R>Rset+1 && G>Gset+1 && B>Bset+1)  { 
+      //ReSet the RGB to set values. 
+      R=Rset;
+      G=Gset;
+      B=Bset;
+      break; 
+    } 
+    //update the strip
+    for(int i=0; i<lStrip.numPixels(); i++) {
+      lStrip.setPixelColor(i, lStrip.Color(R, G, B));
+      tStrip.setPixelColor(i, tStrip.Color(R, G, B));
+      lStrip.show();
+      tStrip.show();
+      delay(0);
+    }
+    //increase by the set amount
+    R=R+finCount;
+    G=G+finCount;
+    B=B+finCount;
+    delay(waitT);
+  }
+}
+
+void fadeOut(int waitT)
+{
+  int R = 0;
+  int G = 0;
+  int B = 0;
+  int foutCount=30;
+  while(1){ //using an inf loop to be more custom.
+  //Protect the strand from higher then 255 values
+  if(R>255 || G>255 || B>255) { break; } //DO NOT DELETE OR ALTER THIS LINE.
+  //break the inf loop if the color is off
+    if (R<0 && G<0 && B<0)  { 
+      //ReSet the RGB to 0 values. 
+      R=0;
+      G=0;
+      B=0;
+      break; 
+    } 
+    //update the strip
+    for(int j=0; j<lStrip.numPixels(); j++) {
+      lStrip.setPixelColor(j, lStrip.Color(R, G, B));
+      lStrip.show();
+      delay(0);
+    }
+    //Decrease by the set amount
+    R=R-foutCount;
+    G=G-foutCount;
+    B=B-foutCount;
+    delay(waitT);
+  }
+  }
+
+
+
 
 
 
