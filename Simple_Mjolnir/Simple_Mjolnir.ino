@@ -80,72 +80,72 @@ void setup(){
 
 void loop() {
 
-  //Narcoleptic.delay(500); // During this time power consumption is minimised
+  Narcoleptic.delay(500); // During this time power consumption is minimised
 
 
-  //while (digitalRead(switchOn) == LOW || digitalRead(switchWait) == LOW){
+  while (digitalRead(switchOn) == LOW || digitalRead(switchWait) == LOW){
 
-  //if (digitalRead(switchWait) == LOW && digitalRead(switchOn) == HIGH){
-  xbee.readPacket();
+    if (digitalRead(switchWait) == LOW && digitalRead(switchOn) == HIGH){
+      xbee.readPacket();
 
-  // check XBee on Gauntlet
-  if (xbee.getResponse().isAvailable()) {
-    // got something
+      // check XBee on Gauntlet
+      if (xbee.getResponse().isAvailable()) {
+        // got something
 
-    // create a response
-    xbee.getResponse().getRx16Response(rx16);
-    data = rx16.getData(0);
-    rssi = rx16.getRssi();
-    //Serial.print("RSSI: ");
-    //Serial.print(rssi);
-    //Serial.println();
-    //Serial.print("Data: ");
-    //Serial.print(data);
-    //Serial.println();        
-
-
-    // button is pressed
-    // pretty lights
-
-    if (data == 49){
-
-      fade();
+        // create a response
+        xbee.getResponse().getRx16Response(rx16);
+        data = rx16.getData(0);
+        rssi = rx16.getRssi();
+        //Serial.print("RSSI: ");
+        //Serial.print(rssi);
+        //Serial.println();
+        //Serial.print("Data: ");
+        //Serial.print(data);
+        //Serial.println();        
 
 
+        // button is pressed
+        // pretty lights
+
+        if (data == 49){
+
+          fade();
+
+
+        }
+
+        // if Mjolnir is too far from the gauntlet 
+        //get angry
+        if (rssi >=80){
+
+          //Mjolnir Gets Angry
+          // lightning effect
+          angryLightning();
+
+        }
+
+      }
+      // check the Vibration Sensor  
+      if (digitalRead(sensorPin) == LOW){
+
+        cd77colorallfillOn();
+        delay(25);
+        cd77colorallfill();
+
+
+      }
     }
 
-    // if Mjolnir is too far from the gauntlet 
-    //get angry
-    if (rssi >=80){
-
-      //Mjolnir Gets Angry
-      // lightning effect
-      angryLightning();
-
+    if (digitalRead(switchOn) == LOW && digitalRead(switchWait == HIGH)){
+      cd77colorallfillOn();
     }
 
   }
-  // check the Vibration Sensor  
-  if (digitalRead(sensorPin) == LOW){
 
-    cd77colorallfillOn();
-    delay(25);
-    cd77colorallfill();
+  cd77colorallfill();
 
 
-  }
 }
-
-//if (digitalRead(switchOn) == LOW && digitalRead(switchWait == HIGH)){
-//cd77colorallfillOn(200);
-//}
-
-//}
-
-//cd77colorallfill(200);
-
-
-//}
 
 // Fills the NeoMatrix 8X8 panel with all of the NeoPixes at one time 
 void cd77colorallfillOn() {  
@@ -193,8 +193,10 @@ void fade()
   int waitT = 5;
   //Fade in
   while(1){ //using an inf loop to be more custom.
-  //Protect the strand from higher then 255 values
-  if(Red>255 || Green>255 || Blue>255) { break; } //DO NOT DELETE OR ALTER THIS LINE.
+    //Protect the strand from higher then 255 values
+    if(Red>255 || Green>255 || Blue>255) { 
+      break; 
+    } //DO NOT DELETE OR ALTER THIS LINE.
     //break the inf loop if the color is higher then what its set at.
     if (Red>redSet+1 && Green>greenSet+1 && Blue>blueSet+1)  { 
       //ReSet the RGB to set values. 
@@ -219,9 +221,11 @@ void fade()
   }
   //Fade Out
   while(1){ //using an inf loop to be more custom.
-  //Protect the strand from higher then 255 values
-  if(Red>255 || Green>255 || Blue>255) { break; } //DO NOT DELETE OR ALTER THIS LINE.
-  //break the inf loop if the color is off
+    //Protect the strand from higher then 255 values
+    if(Red>255 || Green>255 || Blue>255) { 
+      break; 
+    } //DO NOT DELETE OR ALTER THIS LINE.
+    //break the inf loop if the color is off
     if (Red<0 && Green<0 && Blue<0)  { 
       //ReSet the RGB to 0 values. 
       Red=0;
@@ -246,22 +250,24 @@ void fade()
 }
 
 void angryLightning()
-{cd77colorallfillOnRed();
-      delay(100);
-      cd77colorallfill();
-      delay(100);
-      cd77colorallfillOnRed();
-      delay(50);
-      cd77colorallfill();
-      delay(100);
-      cd77colorallfillOnRed();
-      delay(500);
-      cd77colorallfill();
-      delay(100);
-      cd77colorallfillOnRed();
-      delay(200);
-      cd77colorallfill();
+{
+  cd77colorallfillOnRed();
+  delay(100);
+  cd77colorallfill();
+  delay(100);
+  cd77colorallfillOnRed();
+  delay(50);
+  cd77colorallfill();
+  delay(100);
+  cd77colorallfillOnRed();
+  delay(500);
+  cd77colorallfill();
+  delay(100);
+  cd77colorallfillOnRed();
+  delay(200);
+  cd77colorallfill();
 }
+
 
 
 
