@@ -80,7 +80,8 @@ void setup(){
 
 void loop() {
 
- Narcoleptic.delay(500); // During this time power consumption is minimised
+  cd77colorallfill(20);
+  Narcoleptic.delay(500); // During this time power consumption is minimised
 
 
   while (digitalRead(switchOn) == LOW || digitalRead(switchWait) == LOW){
@@ -105,7 +106,7 @@ void loop() {
 
         // if Mjolnir is too far from the gauntlet 
         //get angry
-        if (rssi >=65){
+        if (rssi >=60){
 
           //Mjolnir Gets Angry
           // lightning effect
@@ -114,14 +115,13 @@ void loop() {
           delay(50);
           angryLightning(0.175);
           delay(50);
-          fadeOut(1);
 
 
         }
         // if muscle is activated
         // pretty lights
         else if (data == 49){
-          
+
           fadeIn(10);
           rainbow(10);
           fadeOut(10);
@@ -151,23 +151,51 @@ void loop() {
 
 void angryLightning(float SpeedFactor){
 
-  // Make the lights breathe
-  for (int i = 0; i < 100; i++) {
-    // Intensity will go from 10 - MaximumBrightness in a "breathing" manner
-    float intensity = MaximumBrightness /2.0 * (1.0 + sin(SpeedFactor * i));
-    lStrip.setBrightness(intensity);
-    tStrip.setBrightness(intensity);
-    // Now set every LED to that color
-    for (int ledNumber=0; ledNumber<TOTAL_LEDS; ledNumber++) {
-      lStrip.setPixelColor(ledNumber, 250, 0, 0);
-      tStrip.setPixelColor(ledNumber, 250, 0, 0);
-    }
+  /* / Make the lights breathe
+   for (int i = 0; i < 100; i++) {
+   // Intensity will go from 10 - MaximumBrightness in a "breathing" manner
+   float intensity = MaximumBrightness /2.0 * (1.0 + sin(SpeedFactor * i));
+   lStrip.setBrightness(intensity);
+   tStrip.setBrightness(intensity);
+   // Now set every LED to that color
+   for (int ledNumber=0; ledNumber<TOTAL_LEDS; ledNumber++) {
+   lStrip.setPixelColor(ledNumber, 250, 0, 0);
+   tStrip.setPixelColor(ledNumber, 250, 0, 0);
+   }
+   
+   lStrip.show();
+   tStrip.show();
+   //Wait a bit before continuing to breathe
+   //delay(StepDelay);
+   
+   
+   } */
+  cd77colorallfillOnRed();
+  delay(100);
+  cd77colorallfill(20);
+  delay(100);
+  cd77colorallfillOnRed();
+  delay(50);
+  cd77colorallfill(20);
+  delay(100);
+  cd77colorallfillOnRed();
+  delay(500);
+  cd77colorallfill(20);
+  delay(100);
+  cd77colorallfillOnRed();
+  delay(200);
+  cd77colorallfill(20);
 
-    lStrip.show();
-    tStrip.show();
-    //Wait a bit before continuing to breathe
-    delay(StepDelay);
-  } 
+}
+// Fills the NeoMatrix 8X8 panel with all of the NeoPixes at one time 
+void cd77colorallfillOnRed() {  
+  for(uint16_t i=0; i<lStrip.numPixels(); i++) {
+    lStrip.setPixelColor(i, lStrip.Color(255, 0, 0));   
+    tStrip.setPixelColor(i, tStrip.Color(255, 0, 0));   
+  }       
+  lStrip.show();
+  tStrip.show();
+
 }
 
 // Fills the NeoMatrix 8X8 panel with all of the NeoPixes at one time 
@@ -194,20 +222,17 @@ void cd77colorallfill(uint16_t wait) {
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
 uint32_t Wheel(byte WheelPos) {
-  WheelPos = 165 - WheelPos;
+  WheelPos = 185 - WheelPos;
   if(WheelPos < 85) {
     return lStrip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-    return tStrip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
   } 
-  else if(WheelPos < 170) {
+  else if(WheelPos < 195) {
     WheelPos -= 85;
     return lStrip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-    return tStrip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
   } 
   else {
-    WheelPos -= 170;
+    WheelPos -= 195;
     return lStrip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
-    return tStrip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
   }
 }
 
@@ -269,9 +294,11 @@ void fadeOut(int waitT)
   int B = 0;
   int foutCount=30;
   while(1){ //using an inf loop to be more custom.
-  //Protect the strand from higher then 255 values
-  if(R>255 || G>255 || B>255) { break; } //DO NOT DELETE OR ALTER THIS LINE.
-  //break the inf loop if the color is off
+    //Protect the strand from higher then 255 values
+    if(R>255 || G>255 || B>255) { 
+      break; 
+    } //DO NOT DELETE OR ALTER THIS LINE.
+    //break the inf loop if the color is off
     if (R<0 && G<0 && B<0)  { 
       //ReSet the RGB to 0 values. 
       R=0;
@@ -282,7 +309,9 @@ void fadeOut(int waitT)
     //update the strip
     for(int j=0; j<lStrip.numPixels(); j++) {
       lStrip.setPixelColor(j, lStrip.Color(R, G, B));
+      tStrip.setPixelColor(j, lStrip.Color(R, G, B));
       lStrip.show();
+      tStrip.show();
       delay(0);
     }
     //Decrease by the set amount
@@ -291,10 +320,5 @@ void fadeOut(int waitT)
     B=B-foutCount;
     delay(waitT);
   }
-  }
-
-
-
-
-
+}
 
