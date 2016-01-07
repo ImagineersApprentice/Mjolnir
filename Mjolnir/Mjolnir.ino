@@ -106,7 +106,7 @@ void loop() {
 
         // if Mjolnir is too far from the gauntlet 
         //get angry
-        if (rssi >=60){
+        if (rssi >=85){
 
           //Mjolnir Gets Angry
           // lightning effect
