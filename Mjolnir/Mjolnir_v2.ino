@@ -61,7 +61,7 @@ RemoteAtCommandRequest remoteAtRequestD0 = RemoteAtCommandRequest(remoteAddress,
 RemoteAtCommandRequest remoteAtRequestD2 = RemoteAtCommandRequest(remoteAddress, d2Cmd, dLow, sizeof(dLow));
 RemoteAtCommandRequest remoteAtRequestD4 = RemoteAtCommandRequest(remoteAddress, d4Cmd, dLow, sizeof(dLow));
 
-int currentState = 0;       // Current state of lights
+int currentState = 1;       // Current state of lights
 
 /***************************/
 /***** Switch Setup ********/
@@ -92,6 +92,21 @@ void setup() {
   pinMode(switchMwM, INPUT_PULLUP);
   digitalWrite(switchMwM, HIGH);
   digitalWrite(switchWait, HIGH);
+
+  remoteAtRequestD0.setCommand(d0Cmd);
+  remoteAtRequestD0.setCommandValue(dLow);
+  remoteAtRequestD0.setCommandValueLength(sizeof(dLow));
+  xbee.send(remoteAtRequestD0);
+
+  remoteAtRequestD2.setCommand(d2Cmd);
+  remoteAtRequestD2.setCommandValue(dLow);
+  remoteAtRequestD2.setCommandValueLength(sizeof(dLow));
+  xbee.send(remoteAtRequestD2);
+
+  remoteAtRequestD4.setCommand(d4Cmd);
+  remoteAtRequestD4.setCommandValue(dLow);
+  remoteAtRequestD4.setCommandValueLength(sizeof(dLow));
+  xbee.send(remoteAtRequestD4);
 }
 
 void loop() {
@@ -115,98 +130,100 @@ void loop() {
       //        Serial.print("Data: ");
       //        Serial.println(char(data));
 
-    if (digitalRead(switchWait) == LOW) {
+      if (digitalRead(switchWait) == LOW) {
 
+          switch (data) {
+            case '1':
+              //Serial.println("Case 1");
+              fadeIn(10);
+              rainbow(10);
+              fadeOut(10);
+              return;
+            case '2':
+              //Mjolnir Gets Angry
+              // lightning effect
+              delay(50);
+              angryLightning(0.08);
+              delay(50);
+              angryLightning(0.175);
+              delay(50);
+            case '3':
+              //Serial.println("Case 3");
+              if ( currentState != 0 ) {
+                cd77colorallfillOn(200);
+                currentState = 0;
+              }
+              else {
+                cd77colorallfill(20);
+                currentState = 1;
+                delay(200);
+              }
+              break;
+          }
+
+        if (rssi >= 75) {
+          //Mjolnir Gets Angry
+          // lightning effect
+          delay(50);
+          angryLightning(0.08);
+          delay(50);
+          angryLightning(0.175);
+          delay(50);
+        }
+        if (digitalRead(sensorPin) == LOW) {
+          cd77colorallfillOn(200);
+          delay(25);
+          cd77colorallfill(200);
+        }
+      }
+      if (digitalRead(switchMwM) == LOW) {
         switch (data) {
           case '1':
             //Serial.println("Case 1");
-            fadeIn(10);
-            rainbow(10);
-            fadeOut(10);
-            return;
+            remoteAtRequestD2.setCommand(d2Cmd);
+            remoteAtRequestD2.setCommandValue(dHigh);
+            remoteAtRequestD2.setCommandValueLength(sizeof(dHigh));
+            xbee.send(remoteAtRequestD2);
+            delay(20);
+            remoteAtRequestD2.setCommand(d2Cmd);
+            remoteAtRequestD2.setCommandValue(dLow);
+            remoteAtRequestD2.setCommandValueLength(sizeof(dLow));
+            xbee.send(remoteAtRequestD2);
+            break;
           case '2':
-            //Mjolnir Gets Angry
-            // lightning effect
-            delay(50);
-            angryLightning(0.08);
-            delay(50);
-            angryLightning(0.175);
-            delay(50);
+            //Serial.println("Case 2");
+            remoteAtRequestD0.setCommand(d0Cmd);
+            remoteAtRequestD0.setCommandValue(dHigh);
+            remoteAtRequestD0.setCommandValueLength(sizeof(dHigh));
+            xbee.send(remoteAtRequestD0);
+            delay(20);
+            remoteAtRequestD0.setCommand(d0Cmd);
+            remoteAtRequestD0.setCommandValue(dLow);
+            remoteAtRequestD0.setCommandValueLength(sizeof(dLow));
+            xbee.send(remoteAtRequestD0);
+            break;
           case '3':
             //Serial.println("Case 3");
             if ( currentState != 0 ) {
-              cd77colorallfillOn(200);
+              remoteAtRequestD4.setCommand(d4Cmd);
+              remoteAtRequestD4.setCommandValue(dHigh);
+              remoteAtRequestD4.setCommandValueLength(sizeof(dHigh));
+              xbee.send(remoteAtRequestD4);
+              delay(200);
               currentState = 0;
             }
             else {
-              cd77colorallfill(20);
+              remoteAtRequestD4.setCommand(d4Cmd);
+              remoteAtRequestD4.setCommandValue(dLow);
+              remoteAtRequestD4.setCommandValueLength(sizeof(dLow));
+              xbee.send(remoteAtRequestD4);
               currentState = 1;
               delay(200);
             }
-            break;
+          }
         }
+        data = 0;
       }
-      if (rssi >= 75) {
-        //Mjolnir Gets Angry
-        // lightning effect
-        delay(50);
-        angryLightning(0.08);
-        delay(50);
-        angryLightning(0.175);
-        delay(50);
-      }
-      if (digitalRead(sensorPin) == LOW) {
-        cd77colorallfillOn(200);
-        delay(25);
-        cd77colorallfill(200);
-      }
-    }
-    if (digitalRead(switchMwM) == LOW) {
-      switch (data) {
-        case '1':
-          //Serial.println("Case 1");
-          remoteAtRequestD2.setCommand(d2Cmd);
-          remoteAtRequestD2.setCommandValue(dHigh);
-          remoteAtRequestD2.setCommandValueLength(sizeof(dHigh));
-          xbee.send(remoteAtRequestD2);
-          delay(20);
-          remoteAtRequestD2.setCommand(d2Cmd);
-          remoteAtRequestD2.setCommandValue(dLow);
-          remoteAtRequestD2.setCommandValueLength(sizeof(dLow));
-          xbee.send(remoteAtRequestD2);
-          break;
-        case '2':
-          //Serial.println("Case 2");
-          remoteAtRequestD0.setCommand(d0Cmd);
-          remoteAtRequestD0.setCommandValue(dHigh);
-          remoteAtRequestD0.setCommandValueLength(sizeof(dHigh));
-          xbee.send(remoteAtRequestD0);
-          delay(20);
-          remoteAtRequestD0.setCommand(d0Cmd);
-          remoteAtRequestD0.setCommandValue(dLow);
-          remoteAtRequestD0.setCommandValueLength(sizeof(dLow));
-          xbee.send(remoteAtRequestD0);
-          break;
-        case '3':
-          //Serial.println("Case 3");
-          if ( currentState != 0 ) {
-            remoteAtRequestD4.setCommand(d4Cmd);
-            remoteAtRequestD4.setCommandValue(dHigh);
-            remoteAtRequestD4.setCommandValueLength(sizeof(dHigh));
-            xbee.send(remoteAtRequestD4);
-            delay(200);
-            currentState = 0;
-          }
-          else {
-            remoteAtRequestD4.setCommand(d4Cmd);
-            remoteAtRequestD4.setCommandValue(dLow);
-            remoteAtRequestD4.setCommandValueLength(sizeof(dLow));
-            xbee.send(remoteAtRequestD4);
-            currentState = 1;
-            delay(200);
-          }
-      }
-    }
   }
 }
 
@@ -383,4 +400,3 @@ void fadeOut(int waitT) {
     delay(waitT);
   }
 }
-
