@@ -112,6 +112,21 @@ void setup() {
 void loop() {
 
   cd77colorallfill(20);
+  remoteAtRequestD0.setCommand(d0Cmd);
+  remoteAtRequestD0.setCommandValue(dLow);
+  remoteAtRequestD0.setCommandValueLength(sizeof(dLow));
+  xbee.send(remoteAtRequestD0);
+
+  remoteAtRequestD2.setCommand(d2Cmd);
+  remoteAtRequestD2.setCommandValue(dLow);
+  remoteAtRequestD2.setCommandValueLength(sizeof(dLow));
+  xbee.send(remoteAtRequestD2);
+
+  remoteAtRequestD4.setCommand(d4Cmd);
+  remoteAtRequestD4.setCommandValue(dLow);
+  remoteAtRequestD4.setCommandValueLength(sizeof(dLow));
+  xbee.send(remoteAtRequestD4);
+  currentState=0;
   Narcoleptic.delay(500); // During this time power consumption is minimised
 
 
@@ -147,6 +162,7 @@ void loop() {
               delay(50);
               angryLightning(0.175);
               delay(50);
+              currentState=0;
             case '3':
               //Serial.println("Case 3");
               if ( currentState != 0 ) {
@@ -170,6 +186,7 @@ void loop() {
           angryLightning(0.175);
           delay(50);
         }
+        
         if (digitalRead(sensorPin) == LOW) {
           cd77colorallfillOn(200);
           delay(25);
